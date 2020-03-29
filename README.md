@@ -11,6 +11,8 @@ CLI tool accepts 4 options (short alias and full name):
 
 **Usage example:**
 
+Run commands from the project folder (task1)
+
 ```bash
 $ node my_caesar_cli -a encode -s 7 -i "./input.txt" -o "./output.txt"
 ```
@@ -21,6 +23,11 @@ $ node my_caesar_cli --action encode --shift 7 --input plain.txt --output encode
 
 ```bash
 $ node my_caesar_cli --action decode --shift 7 --input decoded.txt --output plain.txt
+```
+
+checking stderr:
+```bash
+$ node my_caesar_cli -a encode -s 7 -i "./input_not_exists.txt" -o "./output.txt" 2> err.txt
 ```
 
 > input.txt
@@ -89,3 +96,9 @@ npm run lint
 Press <kbd>F5</kbd> to debug.
 
 For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+
+### Checking exit code on windows
+
+A pseudo environment variable named errorlevel stores the exit code:
+
+echo Exit Code is %errorlevel%
