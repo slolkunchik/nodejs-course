@@ -9,9 +9,6 @@ module.exports = function defineOutputFile(outputValue) {
       flags: 'a',
       encoding: null
     });
-    writable.on('error', () => {
-      throw new Error('can not write to file, check file permissions');
-    });
   } else {
     writable = process.stdout;
   }

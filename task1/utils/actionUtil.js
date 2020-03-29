@@ -31,7 +31,9 @@ module.exports = (action, text, shift) => {
     } else if (action === 'encode') {
       writeNewChar = writeEncodeNewChar;
     } else {
-      throw new Error('Enter proper action type - encode or decode');
+      console.error('Enter proper action type - encode or decode');
+      // eslint-disable-next-line no-process-exit
+      process.exit(2);
     }
 
     const alphabetIndex = alphabetLowerCase.indexOf(text[i]);

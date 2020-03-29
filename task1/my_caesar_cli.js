@@ -12,7 +12,9 @@ pipeline(
   defineOutputFile(program.output),
   err => {
     if (err) {
-      console.error('Pipeline failed.', err);
+      console.error(err.message.slice(8));
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
     }
   }
 );
