@@ -1,5 +1,5 @@
-const alphabetLowerCase = 'abcdefghijklmnopqrstuwxyz';
-const alphabetUpperCase = 'ABCDEFGHIJKLMNOPQRSTUWXYZ';
+const alphabetLowerCase = 'abcdefghijklmnopqrstuvwxyz';
+const alphabetUpperCase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const alphabetLength = alphabetLowerCase.length;
 
 module.exports = {
