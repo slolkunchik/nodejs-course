@@ -8,4 +8,31 @@ router.route('/').get(async (req, res) => {
   res.json(users.map(User.toResponse));
 });
 
+router.route('/').post(async (req, res) => {
+  const { name, login, password } = req.body; // pseudo-validation
+  const user = await usersService.create(new User({ name, login, password }));
+
+  res.json([user].map(User.toResponse).pop());
+});
+
+router.route('/:id').get(async (req, res) => {
+  const userById = await usersService.getById(req.params.id);
+  res.json([userById].map(User.toResponse).pop());
+});
+
+router.route('/:id').put(async (req, res) => {
+  const { name, login, password } = req.body; // pseudo-validation
+  const user = await usersService.update(
+    new User({ id: req.params.id, name, login, password })
+  );
+
+  res.json([user].map(User.toResponse).pop());
+});
+
+router.route('/:id').delete(async (req, res) => {
+  const id = req.params.id;
+  await usersService.deleteUser(id);
+  res.status(204).send('The user has been deleted');
+});
+
 module.exports = router;
