@@ -21,7 +21,7 @@ const create = async user => {
 const update = async newUser => {
   const userIndexById = users.findIndex(user => user.id === newUser.id);
   users[userIndexById] = newUser;
-  return newUser;
+  return users[userIndexById];
 };
 
 const getById = async id => {
