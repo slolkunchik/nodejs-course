@@ -37,6 +37,12 @@ router.route('/:boardId/tasks/:taskId').get(async (req, res) => {
 router.route('/:boardId/tasks/:taskId').delete(async (req, res) => {
   const taskId = req.params.taskId;
   const boardId = req.params.boardId;
+  const task = await taskService.getById(boardId, taskId);
+
+  if (!task) {
+    res.status(404).send('Not found');
+  }
+
   await taskService.deleteTask(boardId, taskId);
 
   res.status(204).send('The task has been deleted');

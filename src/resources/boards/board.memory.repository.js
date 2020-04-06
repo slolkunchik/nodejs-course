@@ -1,12 +1,4 @@
-const Board = require('./board.model');
-
-let boards = [
-  new Board({
-    id: '111',
-    title: 'first-board',
-    columns: []
-  })
-];
+let boards = [];
 
 const getAll = async () => {
   return boards;

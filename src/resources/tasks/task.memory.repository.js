@@ -1,6 +1,4 @@
-const Task = require('./task.model');
-
-let tasks = [new Task({ id: '1', boardId: '111' })];
+let tasks = [];
 
 const getAll = async boardId => {
   return tasks.filter(task => task.boardId === boardId);

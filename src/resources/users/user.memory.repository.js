@@ -1,13 +1,4 @@
-const User = require('./user.model');
-
-let users = [
-  new User({
-    id: '87c9bb49-d042-4581-960e-4d74d3264ff0',
-    name: 'User-first',
-    login: 'login-first',
-    password: 'password-first'
-  })
-];
+let users = [];
 
 const getAll = async () => {
   return users;
