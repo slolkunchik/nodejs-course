@@ -1,6 +1,6 @@
 const Task = require('./task.model');
 
-const tasks = [new Task(), new Task({ id: '1', boardId: '111' })];
+let tasks = [new Task({ id: '1', boardId: '111' })];
 
 const getAll = async boardId => {
   return tasks.filter(task => task.boardId === boardId);
@@ -15,4 +15,35 @@ const getById = async (boardId, taskId) => {
   return tasks.find(task => task.boardId === boardId && task.id === taskId);
 };
 
-module.exports = { getAll, create, getById };
+const deleteByBoardId = async boardId => {
+  tasks = tasks.filter(task => task.boardId !== boardId);
+};
+
+const deleteUserId = async userId => {
+  tasks = tasks.map(task => {
+    if (task.userId === userId) {
+      task.userId = null;
+    }
+    return task;
+  });
+};
+
+const deleteTask = async id => {
+  tasks = tasks.filter(task => task.id !== id);
+};
+
+const update = async newTask => {
+  const taskIndexById = tasks.findIndex(task => task.id === newTask.id);
+  tasks[taskIndexById] = newTask;
+  return tasks[taskIndexById];
+};
+
+module.exports = {
+  getAll,
+  create,
+  getById,
+  deleteByBoardId,
+  deleteUserId,
+  deleteTask,
+  update
+};

@@ -11,9 +11,13 @@ router.route('/').get(async (req, res) => {
 
 router.route('/').post(async (req, res) => {
   const { title, columns } = req.body; // pseudo-validation
-  const processedColumns = columns.map(
-    column => new Column({ title: column.title, order: column.order })
-  );
+  let processedColumns = [];
+  if (columns) {
+    processedColumns = columns.map(
+      column => new Column({ title: column.title, order: column.order })
+    );
+  }
+
   const newBoard = await boardService.create(
     new Board({ title, columns: processedColumns })
   );

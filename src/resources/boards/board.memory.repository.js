@@ -24,8 +24,6 @@ const getById = async id => {
 const update = async newBoard => {
   const boardIndexById = boards.findIndex(board => board.id === newBoard.id);
 
-  console.log('old:', boards[boardIndexById]);
-  console.log('new:', newBoard);
   boards[boardIndexById] = newBoard;
 
   return boards[boardIndexById];
