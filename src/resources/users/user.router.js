@@ -1,16 +1,21 @@
 const router = require('express').Router();
 const User = require('./user.model');
 const usersService = require('./user.service');
-const { isUUID } = require('validator');
-const { BAD_REQUEST, NO_CONTENT, getStatusText } = require('http-status-codes');
+const { isUUID, isEmpty } = require('validator');
+const createErrorMiddleware = require('../../middleware/createErrorMiddleware');
+const createError = require('../../common/createError');
+const {
+  BAD_REQUEST,
+  NO_CONTENT,
+  NOT_FOUND,
+  getStatusText
+} = require('http-status-codes');
 const catchErrors = require('../../common/catchErrors');
 
 router.param('id', (req, res, next, id) => {
   if (!isUUID(id)) {
-    res.status(BAD_REQUEST).send(getStatusText(BAD_REQUEST));
-    return;
+    return createErrorMiddleware(req, res, next, BAD_REQUEST);
   }
-
   next();
 });
 
@@ -27,6 +32,11 @@ router
   .post(
     catchErrors(async (req, res) => {
       const { name, login, password } = req.body; // pseudo-validation
+
+      if (isEmpty(name) || isEmpty(login) || isEmpty(password)) {
+        createError(BAD_REQUEST);
+      }
+
       const user = await usersService.create(
         new User({ name, login, password })
       );
@@ -42,6 +52,11 @@ router
       const id = req.params.id;
 
       const userById = await usersService.getById(id);
+
+      if (!userById) {
+        createError(NOT_FOUND);
+      }
+
       res.json(User.toResponse(userById));
     })
   )
@@ -51,9 +66,19 @@ router
       const id = req.params.id;
 
       const { name, login, password } = req.body; // pseudo-validation
+
+      if (isEmpty(name) || isEmpty(login) || isEmpty(password)) {
+        createError(BAD_REQUEST);
+      }
+
       const user = await usersService.update(
         new User({ id, name, login, password })
       );
+
+      if (!user) {
+        createError(NOT_FOUND);
+      }
+
       res.json(User.toResponse(user));
     })
   )
@@ -63,6 +88,7 @@ router
       const id = req.params.id;
 
       await usersService.deleteUser(id);
+
       res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
     })
   );
