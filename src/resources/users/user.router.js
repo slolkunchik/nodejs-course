@@ -1,41 +1,70 @@
 const router = require('express').Router();
 const User = require('./user.model');
 const usersService = require('./user.service');
+const { isUUID } = require('validator');
+const { BAD_REQUEST, NO_CONTENT, getStatusText } = require('http-status-codes');
+const catchErrors = require('../../common/catchErrors');
+
+router.param('id', (req, res, next, id) => {
+  if (!isUUID(id)) {
+    res.status(BAD_REQUEST).send(getStatusText(BAD_REQUEST));
+    return;
+  }
+
+  next();
+});
 
 router
   .route('/')
-  .get(async (req, res) => {
-    const users = await usersService.getAll();
-    // map user fields to exclude secret fields like "password"
-    res.json(users.map(User.toResponse));
-  })
+  .get(
+    catchErrors(async (req, res) => {
+      const users = await usersService.getAll();
+      // map user fields to exclude secret fields like "password"
+      res.json(users.map(User.toResponse));
+    })
+  )
 
-  .post(async (req, res) => {
-    const { name, login, password } = req.body; // pseudo-validation
-    const user = await usersService.create(new User({ name, login, password }));
+  .post(
+    catchErrors(async (req, res) => {
+      const { name, login, password } = req.body; // pseudo-validation
+      const user = await usersService.create(
+        new User({ name, login, password })
+      );
 
-    res.json([user].map(User.toResponse).pop());
-  });
+      res.json(User.toResponse(user));
+    })
+  );
 
 router
   .route('/:id')
-  .get(async (req, res) => {
-    const userById = await usersService.getById(req.params.id);
-    res.json([userById].map(User.toResponse).pop());
-  })
+  .get(
+    catchErrors(async (req, res) => {
+      const id = req.params.id;
 
-  .put(async (req, res) => {
-    const { name, login, password } = req.body; // pseudo-validation
-    const user = await usersService.update(
-      new User({ id: req.params.id, name, login, password })
-    );
-    res.json([user].map(User.toResponse).pop());
-  })
+      const userById = await usersService.getById(id);
+      res.json(User.toResponse(userById));
+    })
+  )
 
-  .delete(async (req, res) => {
-    const id = req.params.id;
-    await usersService.deleteUser(id);
-    res.status(204).send('The user has been deleted');
-  });
+  .put(
+    catchErrors(async (req, res) => {
+      const id = req.params.id;
+
+      const { name, login, password } = req.body; // pseudo-validation
+      const user = await usersService.update(
+        new User({ id, name, login, password })
+      );
+      res.json(User.toResponse(user));
+    })
+  )
+
+  .delete(
+    catchErrors(async (req, res) => {
+      const id = req.params.id;
+
+      await usersService.deleteUser(id);
+      res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
+    })
+  );
 
 module.exports = router;
