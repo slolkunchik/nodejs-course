@@ -14,7 +14,13 @@ const catchErrors = require('../../common/catchErrors');
 
 router.param('id', (req, res, next, id) => {
   if (!isUUID(id)) {
-    return createErrorMiddleware(req, res, next, BAD_REQUEST);
+    return createErrorMiddleware(
+      req,
+      res,
+      next,
+      BAD_REQUEST,
+      'enter correct uuid for user id'
+    );
   }
   next();
 });
@@ -34,7 +40,10 @@ router
       const { name, login, password } = req.body; // pseudo-validation
 
       if (isEmpty(name) || isEmpty(login) || isEmpty(password)) {
-        createError(BAD_REQUEST);
+        createError(
+          BAD_REQUEST,
+          'POST method, enter correct string for user name, login or password'
+        );
       }
 
       const user = await usersService.create(
@@ -54,7 +63,7 @@ router
       const userById = await usersService.getById(id);
 
       if (!userById) {
-        createError(NOT_FOUND);
+        createError(NOT_FOUND, `GET method, user with ${id} id was not found`);
       }
 
       res.json(User.toResponse(userById));
@@ -68,7 +77,10 @@ router
       const { name, login, password } = req.body; // pseudo-validation
 
       if (isEmpty(name) || isEmpty(login) || isEmpty(password)) {
-        createError(BAD_REQUEST);
+        createError(
+          BAD_REQUEST,
+          'PUT method, enter correct string for user name, login or password'
+        );
       }
 
       const user = await usersService.update(
@@ -76,7 +88,7 @@ router
       );
 
       if (!user) {
-        createError(NOT_FOUND);
+        createError(NOT_FOUND, `PUT method, user with ${id} id was not found`);
       }
 
       res.json(User.toResponse(user));

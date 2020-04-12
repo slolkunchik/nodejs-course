@@ -15,7 +15,13 @@ const { isUUID } = require('validator');
 
 router.param('id', (req, res, next, id) => {
   if (!isUUID(id)) {
-    return createErrorMiddleware(req, res, next, BAD_REQUEST);
+    return createErrorMiddleware(
+      req,
+      res,
+      next,
+      BAD_REQUEST,
+      'enter correct uuid for board id'
+    );
   }
   next();
 });
@@ -34,7 +40,10 @@ router
       const { title, columns } = req.body; // pseudo-validation
 
       if (!title) {
-        createError(BAD_REQUEST);
+        createError(
+          BAD_REQUEST,
+          'POST method, enter correct string for board title'
+        );
       }
 
       let processedColumns = [];
@@ -60,7 +69,7 @@ router
       const boardById = await boardService.getById(id);
 
       if (!boardById) {
-        createError(NOT_FOUND);
+        createError(NOT_FOUND, `GET method, board with ${id} id was not found`);
       }
 
       res.json(boardById);
@@ -73,7 +82,10 @@ router
       const { title, columns } = req.body; // pseudo-validation
 
       if (!title || !columns) {
-        createError(BAD_REQUEST);
+        createError(
+          BAD_REQUEST,
+          'PUT method, enter correct string for board title and array for columns'
+        );
       }
 
       const processedColumns = columns.map(
@@ -89,7 +101,7 @@ router
       );
 
       if (!newBoard) {
-        createError(NOT_FOUND);
+        createError(NOT_FOUND, `PUT method, board with ${id} id was not found`);
       }
 
       res.json(newBoard);

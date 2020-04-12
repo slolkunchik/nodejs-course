@@ -41,7 +41,7 @@ app.use((req, res, next) => {
 app.use('/users', userRouter);
 app.use('/boards', [boardRouter, taskRouter]);
 app.use('*', (req, res, next) =>
-  createErrorMiddleware(req, res, next, NOT_FOUND)
+  createErrorMiddleware(req, res, next, NOT_FOUND, 'the route was not found')
 );
 
 app.use((err, req, res, next) => {
@@ -49,7 +49,7 @@ app.use((err, req, res, next) => {
     `Error status code ${err.status ||
       INTERNAL_SERVER_ERROR} was captured! status text: ${getStatusText(
       err.status || INTERNAL_SERVER_ERROR
-    )}`
+    )}, message: ${err.message}`
   );
   errorHandler(err, req, res, next);
 });
@@ -61,9 +61,13 @@ app.use((err, req, res, next) => {
 // }, 1500);
 
 process.on('uncaughtException', err => {
-  logger.error(`captured error: ${err.message}`);
+  logger.error(
+    `captured error: ${err.message}, point in code: ${err.stack
+      .split('\n')[1]
+      .slice(26) || ''}`
+  );
 
-  // handling
+  // handling, app will be stoped
   const exit = process.exit;
   exit(1);
 });
@@ -75,7 +79,11 @@ process.on('uncaughtException', err => {
 // }, 1500);
 
 process.on('unhandledRejection', reason => {
-  logger.error(`${reason.message} detected!`);
+  logger.error(`Unhandled Rejection, reason: ${reason}`);
+
+  // handling, app will be stoped
+  const exit = process.exit;
+  exit(1);
 });
 
 module.exports = app;

@@ -14,14 +14,26 @@ const { isUUID, isEmpty } = require('validator');
 
 router.param('boardId', (req, res, next, boardId) => {
   if (!isUUID(boardId)) {
-    return createErrorMiddleware(req, res, next, BAD_REQUEST);
+    return createErrorMiddleware(
+      req,
+      res,
+      next,
+      BAD_REQUEST,
+      'enter correct uuid for board id'
+    );
   }
   next();
 });
 
 router.param('taskId', (req, res, next, taskId) => {
   if (!isUUID(taskId)) {
-    return createErrorMiddleware(req, res, next, BAD_REQUEST);
+    return createErrorMiddleware(
+      req,
+      res,
+      next,
+      BAD_REQUEST,
+      'enter correct uuid for task id'
+    );
   }
 
   next();
@@ -35,7 +47,10 @@ router
       const tasks = await taskService.getAll(boardId);
 
       if (tasks.length === 0) {
-        createError(NOT_FOUND);
+        createError(
+          NOT_FOUND,
+          `GET method, tasks with board id ${boardId} were not found`
+        );
       }
 
       res.json(tasks.map(Task.toResponse));
@@ -48,7 +63,10 @@ router
       const { title, order, description, userId, columnId } = req.body; // pseudo-validation
 
       if (isEmpty(title) || isEmpty(description) || typeof order !== 'number') {
-        createError(BAD_REQUEST);
+        createError(
+          BAD_REQUEST,
+          'POST method, enter correct string for task title, description or number for order'
+        );
       }
 
       const task = await taskService.create(
@@ -75,7 +93,10 @@ router
       const task = await taskService.getById(boardId, taskId);
 
       if (!task) {
-        createError(NOT_FOUND);
+        createError(
+          NOT_FOUND,
+          `GET method, task with board id ${boardId} and task id ${taskId} was not found`
+        );
       }
 
       res.json(Task.toResponse(task));
@@ -89,7 +110,10 @@ router
       const task = await taskService.getById(boardId, taskId);
 
       if (!task) {
-        createError(NOT_FOUND);
+        createError(
+          NOT_FOUND,
+          `DELETE method, task with board id ${boardId} and task id ${taskId} was not found`
+        );
       }
 
       await taskService.deleteTask(boardId, taskId);
@@ -116,7 +140,10 @@ router
         typeof order !== 'number' ||
         !isUUID(id)
       ) {
-        createError(BAD_REQUEST);
+        createError(
+          BAD_REQUEST,
+          'PUT method, enter correct string for task title, description, number for order or uuid for id'
+        );
       }
 
       const task = await taskService.update(
@@ -124,7 +151,7 @@ router
       );
 
       if (!task) {
-        createError(NOT_FOUND);
+        createError(NOT_FOUND, `PUT method, task with id ${id} was not found`);
       }
 
       res.json(Task.toResponse(task));
