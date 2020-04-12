@@ -2,27 +2,26 @@ const router = require('express').Router();
 const Task = require('./task.model');
 const taskService = require('./task.service');
 const catchErrors = require('../../common/catchErrors');
+const createErrorMiddleware = require('../../middleware/createErrorMiddleware');
+const createError = require('../../common/createError');
 const {
   BAD_REQUEST,
   NO_CONTENT,
   NOT_FOUND,
   getStatusText
 } = require('http-status-codes');
-const { isUUID } = require('validator');
+const { isUUID, isEmpty } = require('validator');
 
 router.param('boardId', (req, res, next, boardId) => {
   if (!isUUID(boardId)) {
-    res.status(BAD_REQUEST).send(getStatusText(BAD_REQUEST));
-    return;
+    return createErrorMiddleware(req, res, next, BAD_REQUEST);
   }
-
   next();
 });
 
 router.param('taskId', (req, res, next, taskId) => {
   if (!isUUID(taskId)) {
-    res.status(BAD_REQUEST).send(getStatusText(BAD_REQUEST));
-    return;
+    return createErrorMiddleware(req, res, next, BAD_REQUEST);
   }
 
   next();
@@ -34,6 +33,11 @@ router
     catchErrors(async (req, res) => {
       const boardId = req.params.boardId;
       const tasks = await taskService.getAll(boardId);
+
+      if (tasks.length === 0) {
+        createError(NOT_FOUND);
+      }
+
       res.json(tasks.map(Task.toResponse));
     })
   )
@@ -42,6 +46,10 @@ router
     catchErrors(async (req, res) => {
       const boardId = req.params.boardId;
       const { title, order, description, userId, columnId } = req.body; // pseudo-validation
+
+      if (isEmpty(title) || isEmpty(description) || typeof order !== 'number') {
+        createError(BAD_REQUEST);
+      }
 
       const task = await taskService.create(
         new Task({
@@ -53,6 +61,7 @@ router
           columnId
         })
       );
+
       res.json(Task.toResponse(task));
     })
   );
@@ -66,10 +75,10 @@ router
       const task = await taskService.getById(boardId, taskId);
 
       if (!task) {
-        res.status(NOT_FOUND).send(getStatusText(NOT_FOUND));
-      } else {
-        res.json(Task.toResponse(task));
+        createError(NOT_FOUND);
       }
+
+      res.json(Task.toResponse(task));
     })
   )
 
@@ -80,7 +89,7 @@ router
       const task = await taskService.getById(boardId, taskId);
 
       if (!task) {
-        res.status(NOT_FOUND).send(getStatusText(NOT_FOUND));
+        createError(NOT_FOUND);
       }
 
       await taskService.deleteTask(boardId, taskId);
@@ -100,9 +109,24 @@ router
         boardId,
         columnId
       } = req.body; // pseudo-validation
+
+      if (
+        isEmpty(title) ||
+        isEmpty(description) ||
+        typeof order !== 'number' ||
+        !isUUID(id)
+      ) {
+        createError(BAD_REQUEST);
+      }
+
       const task = await taskService.update(
         new Task({ id, title, order, description, userId, boardId, columnId })
       );
+
+      if (!task) {
+        createError(NOT_FOUND);
+      }
+
       res.json(Task.toResponse(task));
     })
   );

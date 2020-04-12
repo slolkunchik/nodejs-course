@@ -32,6 +32,11 @@ const deleteTask = async (boardId, taskId) => {
 
 const update = async newTask => {
   const taskIndexById = tasks.findIndex(task => task.id === newTask.id);
+
+  if (taskIndexById < 0) {
+    return null;
+  }
+
   tasks[taskIndexById] = newTask;
   return tasks[taskIndexById];
 };

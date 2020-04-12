@@ -3,6 +3,8 @@ const boardService = require('./board.service');
 const catchErrors = require('../../common/catchErrors');
 const Column = require('../column/column.model');
 const Board = require('./board.model');
+const createErrorMiddleware = require('../../middleware/createErrorMiddleware');
+const createError = require('../../common/createError');
 const {
   BAD_REQUEST,
   NO_CONTENT,
@@ -13,10 +15,8 @@ const { isUUID } = require('validator');
 
 router.param('id', (req, res, next, id) => {
   if (!isUUID(id)) {
-    res.status(BAD_REQUEST).send(getStatusText(BAD_REQUEST));
-    return;
+    return createErrorMiddleware(req, res, next, BAD_REQUEST);
   }
-
   next();
 });
 
@@ -32,6 +32,11 @@ router
   .post(
     catchErrors(async (req, res) => {
       const { title, columns } = req.body; // pseudo-validation
+
+      if (!title) {
+        createError(BAD_REQUEST);
+      }
+
       let processedColumns = [];
       if (columns) {
         processedColumns = columns.map(
@@ -54,11 +59,11 @@ router
       const id = req.params.id;
       const boardById = await boardService.getById(id);
 
-      if (boardById) {
-        res.json(boardById);
-      } else {
-        res.status(NOT_FOUND).send(getStatusText(NOT_FOUND));
+      if (!boardById) {
+        createError(NOT_FOUND);
       }
+
+      res.json(boardById);
     })
   )
 
@@ -66,6 +71,11 @@ router
     catchErrors(async (req, res) => {
       const id = req.params.id;
       const { title, columns } = req.body; // pseudo-validation
+
+      if (!title || !columns) {
+        createError(BAD_REQUEST);
+      }
+
       const processedColumns = columns.map(
         column =>
           new Column({
@@ -77,6 +87,10 @@ router
       const newBoard = await boardService.update(
         new Board({ id, title, columns: processedColumns })
       );
+
+      if (!newBoard) {
+        createError(NOT_FOUND);
+      }
 
       res.json(newBoard);
     })

@@ -12,7 +12,7 @@ const logger = createLogger({
     new transports.File({
       filename: path.join(__dirname, '..', 'logs', '/info.log'),
       level: 'info',
-      format: format.combine(format.uncolorize(), format.simple())
+      format: format.combine(format.uncolorize(), format.json())
     })
   ]
 });
