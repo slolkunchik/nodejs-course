@@ -83,9 +83,7 @@ router
         );
       }
 
-      const user = await usersService.update(
-        new User({ id, name, login, password })
-      );
+      const user = await usersService.update({ id, name, login, password });
 
       if (!user) {
         createError(NOT_FOUND, `PUT method, user with ${id} id was not found`);
@@ -99,7 +97,14 @@ router
     catchErrors(async (req, res) => {
       const id = req.params.id;
 
-      await usersService.deleteUser(id);
+      const deletedCount = await usersService.deleteUser(id);
+
+      if (deletedCount === 0) {
+        createError(
+          NOT_FOUND,
+          `DELETE method, user with ${id} id was not found`
+        );
+      }
 
       res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
     })
