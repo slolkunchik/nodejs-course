@@ -1,5 +1,6 @@
 const { PORT } = require('./common/config');
 const app = require('./app');
+const connectToDB = require('./db/db.client');
 const logger = require('./common/logger');
 
 // TODO: For testing uncaughtException uncomment this code:
@@ -32,6 +33,8 @@ process.on('unhandledRejection', reason => {
   throw new Error('Unhandled Rejection error occurred');
 });
 
-app.listen(PORT, () =>
-  console.log(`App is running on http://localhost:${PORT}`)
-);
+connectToDB(() => {
+  app.listen(PORT, () =>
+    console.log(`App is running on http://localhost:${PORT}`)
+  );
+});
