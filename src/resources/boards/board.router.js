@@ -31,7 +31,7 @@ router
   .get(
     catchErrors(async (req, res) => {
       const boards = await boardService.getAll();
-      res.json(boards);
+      res.json(boards.map(Board.toResponse));
     })
   )
 
@@ -56,8 +56,7 @@ router
       const newBoard = await boardService.create(
         new Board({ title, columns: processedColumns })
       );
-
-      res.json(newBoard);
+      res.json(Board.toResponse(newBoard));
     })
   );
 
@@ -75,7 +74,7 @@ router
         );
       }
 
-      res.json(boardById);
+      res.json(Board.toResponse(boardById));
     })
   )
 
@@ -99,9 +98,11 @@ router
             order: column.order
           })
       );
-      const newBoard = await boardService.update(
-        new Board({ id, title, columns: processedColumns })
-      );
+      const newBoard = await boardService.update({
+        id,
+        title,
+        columns: processedColumns
+      });
 
       if (!newBoard) {
         throw createError(
@@ -110,7 +111,7 @@ router
         );
       }
 
-      res.json(newBoard);
+      res.json(Board.toResponse(newBoard));
     })
   )
 
@@ -118,7 +119,15 @@ router
     catchErrors(async (req, res) => {
       const id = req.params.id;
 
-      await boardService.deleteBoard(id);
+      const deletedCount = await boardService.deleteBoard(id);
+
+      if (deletedCount === 0) {
+        createError(
+          NOT_FOUND,
+          `DELETE method, board with ${id} id was not found`
+        );
+      }
+
       res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
     })
   );
