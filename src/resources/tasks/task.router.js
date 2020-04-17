@@ -116,7 +116,14 @@ router
         );
       }
 
-      await taskService.deleteTask(boardId, taskId);
+      const deletedCount = await taskService.deleteTask(boardId, taskId);
+
+      if (deletedCount === 0) {
+        createError(
+          NOT_FOUND,
+          `DELETE method, task with id ${taskId} was not found`
+        );
+      }
 
       res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
     })
@@ -146,9 +153,15 @@ router
         );
       }
 
-      const task = await taskService.update(
-        new Task({ id, title, order, description, userId, boardId, columnId })
-      );
+      const task = await taskService.update({
+        id,
+        title,
+        order,
+        description,
+        userId,
+        boardId,
+        columnId
+      });
 
       if (!task) {
         createError(NOT_FOUND, `PUT method, task with id ${id} was not found`);
