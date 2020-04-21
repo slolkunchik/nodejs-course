@@ -16,6 +16,10 @@ const getById = async id => {
 const update = async newBoard => {
   const boardIndexById = boards.findIndex(board => board.id === newBoard.id);
 
+  if (boardIndexById < 0) {
+    return null;
+  }
+
   boards[boardIndexById] = newBoard;
 
   return boards[boardIndexById];

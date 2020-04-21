@@ -26,12 +26,17 @@ const deleteUserId = async userId => {
   });
 };
 
-const deleteTask = async id => {
-  tasks = tasks.filter(task => task.id !== id);
+const deleteTask = async (boardId, taskId) => {
+  tasks = tasks.filter(task => task.id !== taskId);
 };
 
 const update = async newTask => {
   const taskIndexById = tasks.findIndex(task => task.id === newTask.id);
+
+  if (taskIndexById < 0) {
+    return null;
+  }
+
   tasks[taskIndexById] = newTask;
   return tasks[taskIndexById];
 };

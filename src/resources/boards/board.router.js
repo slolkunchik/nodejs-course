@@ -1,56 +1,126 @@
 const router = require('express').Router();
 const boardService = require('./board.service');
-
+const catchErrors = require('../../common/catchErrors');
 const Column = require('../column/column.model');
 const Board = require('./board.model');
+const createErrorMiddleware = require('../../middleware/createErrorMiddleware');
+const createError = require('../../common/createError');
+const {
+  BAD_REQUEST,
+  NO_CONTENT,
+  NOT_FOUND,
+  getStatusText
+} = require('http-status-codes');
+const { isUUID } = require('validator');
 
-router.route('/').get(async (req, res) => {
-  const boards = await boardService.getAll();
-  res.json(boards);
-});
-
-router.route('/').post(async (req, res) => {
-  const { title, columns } = req.body; // pseudo-validation
-  let processedColumns = [];
-  if (columns) {
-    processedColumns = columns.map(
-      column => new Column({ title: column.title, order: column.order })
+router.param('id', (req, res, next, id) => {
+  if (!isUUID(id)) {
+    return createErrorMiddleware(
+      req,
+      res,
+      next,
+      BAD_REQUEST,
+      'enter correct uuid for board id'
     );
   }
+  next();
+});
 
-  const newBoard = await boardService.create(
-    new Board({ title, columns: processedColumns })
+router
+  .route('/')
+  .get(
+    catchErrors(async (req, res) => {
+      const boards = await boardService.getAll();
+      res.json(boards);
+    })
+  )
+
+  .post(
+    catchErrors(async (req, res) => {
+      const { title, columns } = req.body; // pseudo-validation
+
+      if (!title) {
+        throw createError(
+          BAD_REQUEST,
+          'POST method, enter correct string for board title'
+        );
+      }
+
+      let processedColumns = [];
+      if (columns) {
+        processedColumns = columns.map(
+          column => new Column({ title: column.title, order: column.order })
+        );
+      }
+
+      const newBoard = await boardService.create(
+        new Board({ title, columns: processedColumns })
+      );
+
+      res.json(newBoard);
+    })
   );
 
-  res.json(newBoard);
-});
+router
+  .route('/:id')
+  .get(
+    catchErrors(async (req, res) => {
+      const id = req.params.id;
+      const boardById = await boardService.getById(id);
 
-router.route('/:id').get(async (req, res) => {
-  const boardById = await boardService.getById(req.params.id);
-  if (boardById) {
-    res.json(boardById);
-  } else {
-    res.status(404).send('Not found');
-  }
-});
+      if (!boardById) {
+        throw createError(
+          NOT_FOUND,
+          `GET method, board with ${id} id was not found`
+        );
+      }
 
-router.route('/:id').put(async (req, res) => {
-  const { title, columns } = req.body; // pseudo-validation
-  const processedColumns = columns.map(
-    column =>
-      new Column({ id: column.id, title: column.title, order: column.order })
+      res.json(boardById);
+    })
+  )
+
+  .put(
+    catchErrors(async (req, res) => {
+      const id = req.params.id;
+      const { title, columns } = req.body; // pseudo-validation
+
+      if (!title || !columns) {
+        throw createError(
+          BAD_REQUEST,
+          'PUT method, enter correct string for board title and array for columns'
+        );
+      }
+
+      const processedColumns = columns.map(
+        column =>
+          new Column({
+            id: column.id,
+            title: column.title,
+            order: column.order
+          })
+      );
+      const newBoard = await boardService.update(
+        new Board({ id, title, columns: processedColumns })
+      );
+
+      if (!newBoard) {
+        throw createError(
+          NOT_FOUND,
+          `PUT method, board with ${id} id was not found`
+        );
+      }
+
+      res.json(newBoard);
+    })
+  )
+
+  .delete(
+    catchErrors(async (req, res) => {
+      const id = req.params.id;
+
+      await boardService.deleteBoard(id);
+      res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
+    })
   );
-  const newBoard = await boardService.update(
-    new Board({ id: req.params.id, title, columns: processedColumns })
-  );
-
-  res.json(newBoard);
-});
-
-router.route('/:id').delete(async (req, res) => {
-  const id = req.params.id;
-  await boardService.deleteBoard(id);
-  res.status(204).send('The board has been deleted');
-});
 
 module.exports = router;
