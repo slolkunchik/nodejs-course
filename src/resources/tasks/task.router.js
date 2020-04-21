@@ -119,7 +119,7 @@ router
       const deletedCount = await taskService.deleteTask(boardId, taskId);
 
       if (deletedCount === 0) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `DELETE method, task with id ${taskId} was not found`
         );

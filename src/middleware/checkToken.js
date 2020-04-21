@@ -11,12 +11,12 @@ module.exports = (req, res, next) => {
 
     jwt.verify(token, JWT_SECRET_KEY, err => {
       if (err) {
-        createError(UNAUTHORIZED, getStatusText(UNAUTHORIZED));
+        throw createError(UNAUTHORIZED, getStatusText(UNAUTHORIZED));
       } else {
         return next();
       }
     });
   } else {
-    createError(UNAUTHORIZED, getStatusText(UNAUTHORIZED));
+    throw createError(UNAUTHORIZED, getStatusText(UNAUTHORIZED));
   }
 };

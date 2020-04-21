@@ -104,7 +104,7 @@ router
       const deletedCount = await usersService.deleteUser(id);
 
       if (deletedCount === 0) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `DELETE method, user with ${id} id was not found`
         );

@@ -119,7 +119,7 @@ router
       const deletedCount = await boardService.deleteBoard(id);
 
       if (deletedCount === 0) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `DELETE method, board with ${id} id was not found`
         );
