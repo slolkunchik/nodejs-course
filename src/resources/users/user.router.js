@@ -40,7 +40,7 @@ router
       const { name, login, password } = req.body; // pseudo-validation
 
       if (isEmpty(name) || isEmpty(login) || isEmpty(password)) {
-        createError(
+        throw createError(
           BAD_REQUEST,
           'POST method, enter correct string for user name, login or password'
         );
@@ -63,7 +63,10 @@ router
       const userById = await usersService.getById(id);
 
       if (!userById) {
-        createError(NOT_FOUND, `GET method, user with ${id} id was not found`);
+        throw createError(
+          NOT_FOUND,
+          `GET method, user with ${id} id was not found`
+        );
       }
 
       res.json(User.toResponse(userById));
@@ -77,7 +80,7 @@ router
       const { name, login, password } = req.body; // pseudo-validation
 
       if (isEmpty(name) || isEmpty(login) || isEmpty(password)) {
-        createError(
+        throw createError(
           BAD_REQUEST,
           'PUT method, enter correct string for user name, login or password'
         );
@@ -88,7 +91,10 @@ router
       );
 
       if (!user) {
-        createError(NOT_FOUND, `PUT method, user with ${id} id was not found`);
+        throw createError(
+          NOT_FOUND,
+          `PUT method, user with ${id} id was not found`
+        );
       }
 
       res.json(User.toResponse(user));

@@ -40,7 +40,7 @@ router
       const { title, columns } = req.body; // pseudo-validation
 
       if (!title) {
-        createError(
+        throw createError(
           BAD_REQUEST,
           'POST method, enter correct string for board title'
         );
@@ -69,7 +69,10 @@ router
       const boardById = await boardService.getById(id);
 
       if (!boardById) {
-        createError(NOT_FOUND, `GET method, board with ${id} id was not found`);
+        throw createError(
+          NOT_FOUND,
+          `GET method, board with ${id} id was not found`
+        );
       }
 
       res.json(boardById);
@@ -82,7 +85,7 @@ router
       const { title, columns } = req.body; // pseudo-validation
 
       if (!title || !columns) {
-        createError(
+        throw createError(
           BAD_REQUEST,
           'PUT method, enter correct string for board title and array for columns'
         );
@@ -101,7 +104,10 @@ router
       );
 
       if (!newBoard) {
-        createError(NOT_FOUND, `PUT method, board with ${id} id was not found`);
+        throw createError(
+          NOT_FOUND,
+          `PUT method, board with ${id} id was not found`
+        );
       }
 
       res.json(newBoard);
