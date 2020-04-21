@@ -8,13 +8,9 @@ const taskRouter = require('./resources/tasks/task.router');
 const loginRouter = require('./resources/login/login.router');
 const errorHandler = require('./middleware/errorHandler');
 const createErrorMiddleware = require('./middleware/createErrorMiddleware');
-const {
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-  getStatusText
-} = require('http-status-codes');
-const logger = require('./middleware/loggerMiddleware');
+const { NOT_FOUND } = require('http-status-codes');
 const app = express();
+const logger = require('./common/logger');
 const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
 const checkToken = require('./middleware/checkToken');
 
@@ -46,46 +42,6 @@ app.use('*', (req, res, next) =>
   createErrorMiddleware(req, res, next, NOT_FOUND, 'the route was not found')
 );
 
-app.use((err, req, res, next) => {
-  logger.error(
-    `Error status code ${err.status ||
-      INTERNAL_SERVER_ERROR} was captured! status text: ${getStatusText(
-      err.status || INTERNAL_SERVER_ERROR
-    )}, message: ${err.message}`
-  );
-  errorHandler(err, req, res, next);
-});
-
-// TODO: For testing uncaughtException uncomment this code:
-
-// setTimeout(() => {
-//   throw new Error('Oops! UncaughtException!');
-// }, 1500);
-
-process.on('uncaughtException', err => {
-  logger.error(
-    `captured error: ${err.message}, point in code: ${err.stack
-      .split('\n')[1]
-      .slice(26) || ''}`
-  );
-
-  // handling, app will be stoped
-  const exit = process.exit;
-  exit(1);
-});
-
-// TODO: For testing unhandledRejection uncomment this code:
-
-// setTimeout(() => {
-//   Promise.reject(new Error('Oops! UnhandledRejection'));
-// }, 1500);
-
-process.on('unhandledRejection', reason => {
-  logger.error(`Unhandled Rejection, reason: ${reason}`);
-
-  // handling, app will be stopped
-  const exit = process.exit;
-  exit(1);
-});
+app.use(errorHandler);
 
 module.exports = app;

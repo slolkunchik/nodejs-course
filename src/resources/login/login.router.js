@@ -12,7 +12,7 @@ router.route('/').post(
     const user = await loginService.findByLogin(login);
 
     if (!user || !(await loginService.isPasswordMatch(user, password))) {
-      createError(
+      throw createError(
         FORBIDDEN,
         `POST method, the user with login ${login} and password ${password} does not have access rights to the content`
       );
@@ -20,7 +20,7 @@ router.route('/').post(
 
     loginService.sign(user, (err, token) => {
       if (err) {
-        createError(UNAUTHORIZED, getStatusText(UNAUTHORIZED));
+        throw createError(UNAUTHORIZED, getStatusText(UNAUTHORIZED));
       }
       res.json({ token });
     });

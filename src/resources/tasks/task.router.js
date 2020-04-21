@@ -47,7 +47,7 @@ router
       const tasks = await taskService.getAll(boardId);
 
       if (tasks.length === 0) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `GET method, tasks with board id ${boardId} were not found`
         );
@@ -63,7 +63,7 @@ router
       const { title, order, description, userId, columnId } = req.body; // pseudo-validation
 
       if (isEmpty(title) || isEmpty(description) || typeof order !== 'number') {
-        createError(
+        throw createError(
           BAD_REQUEST,
           'POST method, enter correct string for task title, description or number for order'
         );
@@ -93,7 +93,7 @@ router
       const task = await taskService.getById(boardId, taskId);
 
       if (!task) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `GET method, task with board id ${boardId} and task id ${taskId} was not found`
         );
@@ -110,7 +110,7 @@ router
       const task = await taskService.getById(boardId, taskId);
 
       if (!task) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `DELETE method, task with board id ${boardId} and task id ${taskId} was not found`
         );
@@ -119,7 +119,7 @@ router
       const deletedCount = await taskService.deleteTask(boardId, taskId);
 
       if (deletedCount === 0) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `DELETE method, task with id ${taskId} was not found`
         );
@@ -147,7 +147,7 @@ router
         typeof order !== 'number' ||
         !isUUID(id)
       ) {
-        createError(
+        throw createError(
           BAD_REQUEST,
           'PUT method, enter correct string for task title, description, number for order or uuid for id'
         );
@@ -164,7 +164,10 @@ router
       });
 
       if (!task) {
-        createError(NOT_FOUND, `PUT method, task with id ${id} was not found`);
+        throw createError(
+          NOT_FOUND,
+          `PUT method, task with id ${id} was not found`
+        );
       }
 
       res.json(Task.toResponse(task));
