@@ -6,7 +6,7 @@ const Task = require('../resources/tasks/task.model');
 const Column = require('../resources/column/column.model');
 
 const users = [
-  new User({ name: 'admin', login: 'admin', password: 'adminPass' }),
+  new User({ name: 'admin', login: 'admin', password: 'admin' }),
   new User({ name: 'user1', login: 'user1', password: 'user1Pass' })
 ];
 
