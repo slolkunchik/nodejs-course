@@ -46,9 +46,7 @@ router
         );
       }
 
-      const user = await usersService.create(
-        new User({ name, login, password })
-      );
+      const user = await usersService.create({ name, login, password });
 
       res.json(User.toResponse(user));
     })
