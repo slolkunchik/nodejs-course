@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const findByLogin = login => usersService.findByLogin(login);
 
 const isPasswordMatch = async (user, password) => {
-  return await bcrypt.compare(password, user.password);
+  return bcrypt.compare(password, user.password);
 };
 
 const sign = (user, cb) => {
