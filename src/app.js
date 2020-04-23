@@ -5,12 +5,14 @@ const YAML = require('yamljs');
 const userRouter = require('./resources/users/user.router');
 const boardRouter = require('./resources/boards/board.router');
 const taskRouter = require('./resources/tasks/task.router');
+const loginRouter = require('./resources/login/login.router');
 const errorHandler = require('./middleware/errorHandler');
 const createErrorMiddleware = require('./middleware/createErrorMiddleware');
 const { NOT_FOUND } = require('http-status-codes');
 const app = express();
 const logger = require('./common/logger');
 const swaggerDocument = YAML.load(path.join(__dirname, '../doc/api.yaml'));
+const checkToken = require('./middleware/checkToken');
 
 app.use(express.json());
 
@@ -33,8 +35,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/users', userRouter);
-app.use('/boards', [boardRouter, taskRouter]);
+app.use('/users', checkToken, userRouter);
+app.use('/boards', checkToken, [boardRouter, taskRouter]);
+app.use('/login', loginRouter);
 app.use('*', (req, res, next) =>
   createErrorMiddleware(req, res, next, NOT_FOUND, 'the route was not found')
 );
