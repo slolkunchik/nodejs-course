@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const boardService = require('./board.service');
 const catchErrors = require('../../common/catchErrors');
-const Column = require('../column/column.model');
 const Board = require('./board.model');
 const createErrorMiddleware = require('../../middleware/createErrorMiddleware');
 const createError = require('../../common/createError');
@@ -31,7 +30,7 @@ router
   .get(
     catchErrors(async (req, res) => {
       const boards = await boardService.getAll();
-      res.json(boards);
+      res.json(boards.map(Board.toResponse));
     })
   )
 
@@ -48,16 +47,16 @@ router
 
       let processedColumns = [];
       if (columns) {
-        processedColumns = columns.map(
-          column => new Column({ title: column.title, order: column.order })
-        );
+        processedColumns = columns.map(column => ({
+          title: column.title,
+          order: column.order
+        }));
       }
 
       const newBoard = await boardService.create(
         new Board({ title, columns: processedColumns })
       );
-
-      res.json(newBoard);
+      res.json(Board.toResponse(newBoard));
     })
   );
 
@@ -75,7 +74,7 @@ router
         );
       }
 
-      res.json(boardById);
+      res.json(Board.toResponse(boardById));
     })
   )
 
@@ -91,17 +90,16 @@ router
         );
       }
 
-      const processedColumns = columns.map(
-        column =>
-          new Column({
-            id: column.id,
-            title: column.title,
-            order: column.order
-          })
-      );
-      const newBoard = await boardService.update(
-        new Board({ id, title, columns: processedColumns })
-      );
+      const processedColumns = columns.map(column => ({
+        id: column.id,
+        title: column.title,
+        order: column.order
+      }));
+      const newBoard = await boardService.update({
+        id,
+        title,
+        columns: processedColumns
+      });
 
       if (!newBoard) {
         throw createError(
@@ -110,7 +108,7 @@ router
         );
       }
 
-      res.json(newBoard);
+      res.json(Board.toResponse(newBoard));
     })
   )
 
@@ -118,7 +116,15 @@ router
     catchErrors(async (req, res) => {
       const id = req.params.id;
 
-      await boardService.deleteBoard(id);
+      const deletedCount = await boardService.deleteBoard(id);
+
+      if (deletedCount === 0) {
+        createError(
+          NOT_FOUND,
+          `DELETE method, board with ${id} id was not found`
+        );
+      }
+
       res.status(NO_CONTENT).send(getStatusText(NO_CONTENT));
     })
   );
