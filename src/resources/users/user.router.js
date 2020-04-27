@@ -46,9 +46,7 @@ router
         );
       }
 
-      const user = await usersService.create(
-        new User({ name, login, password })
-      );
+      const user = await usersService.create({ name, login, password });
 
       res.json(User.toResponse(user));
     })
@@ -106,7 +104,7 @@ router
       const deletedCount = await usersService.deleteUser(id);
 
       if (deletedCount === 0) {
-        createError(
+        throw createError(
           NOT_FOUND,
           `DELETE method, user with ${id} id was not found`
         );
