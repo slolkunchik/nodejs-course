@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const boardService = require('./board.service');
 const catchErrors = require('../../common/catchErrors');
-const Column = require('../column/column.model');
 const Board = require('./board.model');
 const createErrorMiddleware = require('../../middleware/createErrorMiddleware');
 const createError = require('../../common/createError');
@@ -48,9 +47,10 @@ router
 
       let processedColumns = [];
       if (columns) {
-        processedColumns = columns.map(
-          column => new Column({ title: column.title, order: column.order })
-        );
+        processedColumns = columns.map(column => ({
+          title: column.title,
+          order: column.order
+        }));
       }
 
       const newBoard = await boardService.create(
@@ -90,14 +90,11 @@ router
         );
       }
 
-      const processedColumns = columns.map(
-        column =>
-          new Column({
-            id: column.id,
-            title: column.title,
-            order: column.order
-          })
-      );
+      const processedColumns = columns.map(column => ({
+        id: column.id,
+        title: column.title,
+        order: column.order
+      }));
       const newBoard = await boardService.update({
         id,
         title,

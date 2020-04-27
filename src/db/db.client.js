@@ -3,7 +3,6 @@ const { MONGO_CONNECTION_STRING } = require('../common/config');
 const User = require('../resources/users/user.model');
 const Board = require('../resources/boards/board.model');
 const Task = require('../resources/tasks/task.model');
-const Column = require('../resources/column/column.model');
 
 const users = [
   new User({ name: 'admin', login: 'admin', password: 'adminPass' }),
@@ -11,10 +10,13 @@ const users = [
 ];
 
 const boards = [
-  new Board({ title: 'rss team', columns: [] }),
+  new Board({
+    title: 'rss team',
+    columns: [{ title: 'tasks to do 1', order: 1 }]
+  }),
   new Board({
     title: 'work',
-    columns: new Column({ title: 'tasks to do', order: 0 })
+    columns: [{ title: 'tasks to do 2', order: 2 }]
   })
 ];
 
@@ -33,11 +35,12 @@ const connectToDB = callback => {
   db.on('error', console.error.bind(console, 'connection error:'));
   db.once('open', () => {
     console.log("we're connected to DB!");
-    db.dropDatabase(); // delete previous data from DB;
-    User.insertMany(users);
-    Board.insertMany(boards);
-    Task.insertMany(tasks);
-    callback();
+    db.dropDatabase(() => {
+      User.insertMany(users);
+      Board.insertMany(boards);
+      Task.insertMany(tasks);
+      callback();
+    }); // delete previous data from DB;
   });
 };
 
